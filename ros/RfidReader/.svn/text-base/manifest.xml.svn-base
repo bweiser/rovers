@@ -1,0 +1,14 @@
+<package>
+  <description brief="RfidReader">
+
+     RfidReader
+
+  </description>
+  <author>Bill Mania bill@manialabs.us</author>
+  <license>Copyright 2011 Adler Planetarium</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="rospy"/>
+
+</package>
+
+

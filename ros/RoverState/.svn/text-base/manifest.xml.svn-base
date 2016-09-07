@@ -1,0 +1,15 @@
+<package>
+  <description brief="RoverState">
+
+     RoverState
+
+  </description>
+  <author>Bill</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/RoverState</url>
+  <depend package="rospy"/>
+
+</package>
+
+

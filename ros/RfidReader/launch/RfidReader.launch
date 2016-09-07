@@ -1,0 +1,92 @@
+<launch>
+    <param
+        name="RfidReader/serial/port"
+        type="string"
+        value="/dev/ttyUSB0"
+     />
+    <param
+        name="RfidReader/serial/speed"
+        type="int"
+        value="9600"
+     />
+    <param
+        name="RfidReader/serial/timeout"
+        type="int"
+        value="1"
+     />
+    <param
+        name="RfidReader/tags/topGoal/RFID"
+        type="string"
+        value="41 0 129 79 163"
+     />
+    <param
+        name="RfidReader/tags/topGoal/name"
+        type="string"
+        value="Mud"
+     />
+    <param
+        name="RfidReader/tags/topGoal/proximityList"
+        type="string"
+        value="62 0 158 58 200,40 0 122 92 83"
+     />
+    <param
+        name="RfidReader/tags/topGoal/proximityName"
+        type="string"
+        value="Mud Proximity"
+     />
+    <param
+        name="RfidReader/tags/middleGoal/RFID"
+        type="string"
+        value="37 0 0 171 196"
+     />
+    <param
+        name="RfidReader/tags/middleGoal/name"
+        type="string"
+        value="Fossil"
+     />
+    <param
+        name="RfidReader/tags/middleGoal/proximityList"
+        type="string"
+        value="62 0 158 16 169"
+     />
+    <param
+        name="RfidReader/tags/middleGoal/proximityName"
+        type="string"
+        value="Fossil Proximity"
+     />
+    <param
+        name="RfidReader/tags/bottomGoal/RFID"
+        type="string"
+        value="64 0 12 220 166"
+     />
+    <param
+        name="RfidReader/tags/bottomGoal/name"
+        type="string"
+        value="Gypsum"
+     />
+    <param
+        name="RfidReader/tags/bottomGoal/proximityList"
+        type="string"
+        value="66 0 112 25 220"
+     />
+    <param
+        name="RfidReader/tags/bottomGoal/proximityName"
+        type="string"
+        value="Gypsum Proximity"
+     />
+    <param
+        name="RfidReader/tags/unknownRFID"
+        type="string"
+        value="Unknown"
+     />
+
+    <node
+        pkg="RfidReader"
+        name="RfidReader"
+        type="RfidReader.py"
+        args=""
+        output="log"
+        respawn="false"
+     />
+</launch>
+

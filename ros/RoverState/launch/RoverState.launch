@@ -1,0 +1,36 @@
+<launch>
+    <param
+        name="RoverState/battery/channel"
+        type="int"
+        value="0"
+     />
+    <param
+        name="RoverState/battery/fullCharge"
+        type="int"
+        value="700"
+     />
+    <param
+        name="RoverState/battery/depletedAtPercentage"
+        type="int"
+        value="80"
+     />
+    <param
+        name="RoverState/range/front/channel"
+        type="int"
+        value="1"
+     />
+    <param
+        name="RoverState/range/back/channel"
+        type="int"
+        value="2"
+     />
+
+    <node
+        pkg="RoverState"
+        name="RoverState"
+        type="RoverState.py"
+        args=""
+        output="log"
+        respawn="false"
+     />
+</launch>

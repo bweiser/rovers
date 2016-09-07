@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/planetxrobots/!svn/ver/59/ros/Control/node
+END
+Control.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/planetxrobots/!svn/ver/59/ros/Control/node/Control.py
+END
+UIServer.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/planetxrobots/!svn/ver/51/ros/Control/node/UIServer.py
+END
+UserInterfaceMessages.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/planetxrobots/!svn/ver/59/ros/Control/node/UserInterfaceMessages.py
+END

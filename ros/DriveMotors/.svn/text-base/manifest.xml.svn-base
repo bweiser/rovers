@@ -1,0 +1,15 @@
+<package>
+  <description brief="DriveMotors">
+
+    A service to set the speed and direction of the drive
+    motors.
+
+  </description>
+  <author>Bill Mania, bill@manialabs.us</author>
+  <license>Copyright 2011 Adler Planetarium</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="rospy"/>
+
+</package>
+
+

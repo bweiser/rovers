@@ -1,0 +1,187 @@
+#!/usr/bin/env python
+
+# Copyright 2011 Adler Planetarium
+# Created by Bill Mania and Mania Labs for Adler Planetarium
+# bill@manialabs.us
+
+import roslib ; roslib.load_manifest('Control')
+import rospy
+
+from RfidReader.msg import Rfid
+from DirectionButtons.msg import DirectionButton
+from DriveMotors.srv import Move
+from RoverState.msg import Battery, Range
+
+import sys
+import urllib
+
+from UIServer import *
+from InputEvents import InputEvents
+
+serverName = 'control'
+sessionStarted = False
+topButtonEnabled = False
+middleButtonEnabled = False
+bottomButtonEnabled = False
+startButtonEnabled = True
+chargeLevel = 100
+batteryDepleted = False
+serialNumber = 'Unknown'
+goalsFound = []
+
+def mainControlLoop(ui):
+
+    global sessionStarted, startButtonEnabled
+
+    def handleVideoMessage(ui):
+        remoteImage = urllib.urlopen('http://robot:8080/?action=snapshot')
+        image = remoteImage.read()
+        remoteImage.close()
+
+        ui.sendMessage(
+            uiMessages.videoMessage(
+                image
+                )
+            )
+
+        return
+
+    def batteryEvent(batteryInfo):
+        global chargeLevel, batteryDepleted
+
+        chargeLevel = batteryInfo.batteryVoltagePercentage
+        batteryDepleted = batteryInfo.depleted
+        if batteryDepleted:
+            ui.sendMessage(uiMessages.nofuelMessage(serialNumber)) 
+
+        return
+        
+    def buttonEvent(whichButton):
+
+        global sessionStarted, startButtonEnabled, topButtonEnabled, middleButtonEnabled, bottomButtonEnabled
+
+        rospy.logdebug('buttonEvent() called with %s' % (
+                whichButton.buttonEvent
+                ))
+
+        if whichButton.buttonEvent in InputEvents.joystickPresses and sessionStarted:
+            if whichButton.buttonEvent == InputEvents.FORWARD:
+                response = motorService(50, 50, 0, 50)
+            elif whichButton.buttonEvent == InputEvents.BACKWARD:
+                response = motorService(-50, -50, 0, 50)
+            elif whichButton.buttonEvent == InputEvents.LEFT:
+                response = motorService(-40, 40, 0, 50)
+            elif whichButton.buttonEvent == InputEvents.RIGHT:
+                response = motorService(40, -40, 0, 50)
+            else:
+                response = motorService(0, 0, 0, 50)
+
+        elif whichButton.buttonEvent in InputEvents.joystickReleases and sessionStarted:
+                response = motorService(0, 0, 0, 50)
+
+        elif whichButton.buttonEvent in InputEvents.buttonReleases:
+            if whichButton.buttonEvent == InputEvents.START_RELEASE and startButtonEnabled:
+                sessionStarted = True
+            elif whichButton.buttonEvent == InputEvents.TOP_RELEASE and topButtonEnabled:
+                ui.sendMessage(uiMessages.buttonMessage(whichButton.buttonEvent))
+                topButtonEnabled = False
+            elif whichButton.buttonEvent == InputEvents.MIDDLE_RELEASE and middleButtonEnabled:
+                ui.sendMessage(uiMessages.buttonMessage(whichButton.buttonEvent))
+                middleButtonEnabled = False
+            elif whichButton.buttonEvent == InputEvents.BOTTOM_RELEASE and bottomButtonEnabled:
+                ui.sendMessage(uiMessages.buttonMessage(whichButton.buttonEvent))
+                bottomButtonEnabled = False
+                
+        return
+
+    def rfidEvent(rfid):
+        global goalsFound, topButtonEnabled, middleButtonEnabled, bottomButtonEnabled
+
+        rospy.logdebug('Received RFID: %s' % (rfid.rfidTag))
+
+        if rfid.goalOrProximity == 'Goal':
+            goalReached = rfid.rfidTag
+            if goalReached not in goalsFound:
+                goalsFound.append(goalReached)
+            goalProximityReached = ''
+            if goalReached == InputEvents.TOP_RELEASE:
+                topButtonEnabled = True
+            elif goalReached == InputEvents.MIDDLE_RELEASE:
+                middleButtonEnabled = True
+            elif goalReached == InputEvents.BOTTOM_RELEASE:
+                bottomButtonEnabled = True
+        else:
+            goalProximityReached = rfid.rfidTag
+            goalReached = ''
+            
+        ui.sendMessage(
+            uiMessages.stateMessage(
+                chargeLevel,
+                goalReached,
+                goalProximityReached,
+                sessionSecondsLeft
+                )
+            )
+    
+        if len(goalsFound) >= 3:
+            ui.sendMessage(
+                uiMessages.doneMessage(
+                    rospy.get_param('Control/timers/sessionSeconds') - sessionSecondsLeft
+                    )
+                )
+            goalsFound = []
+
+        return
+
+    rospy.Subscriber('directionButtons', DirectionButton, buttonEvent)
+    rospy.Subscriber('batteryInfo', Battery, batteryEvent)
+    rospy.Subscriber('rfid', Rfid, rfidEvent)
+    rospy.wait_for_service('DriveMotors')
+    motorService = rospy.ServiceProxy('DriveMotors', Move, persistent = True)
+
+    serialNumber = rospy.get_param('Control/rover/serialNumber')
+    ipAddress = rospy.get_param('Control/rover/ipAddress')
+
+    while not rospy.is_shutdown():
+
+        while not sessionStarted:
+            rospy.sleep(1.0)
+
+        ui.sendMessage(uiMessages.startMessage(serialNumber, ipAddress, chargeLevel)) 
+
+        endOfSession = rospy.get_time() + rospy.get_param('Control/timers/sessionSeconds')
+
+        while rospy.get_time() < endOfSession and not rospy.is_shutdown():
+            sessionSecondsLeft = int(endOfSession - rospy.get_time())
+        
+            handleVideoMessage(ui)
+
+            # development delay
+            rospy.sleep(1.0)
+        
+        if rospy.get_time() >= endOfSession:
+            startButtonEnabled = False
+            sessionStarted = False
+            response = motorService(0, 0, 0, 50)
+            rospy.logdebug('Session expired')
+            delaySeconds = rospy.get_param('Control/timers/interSessionDelaySeconds')
+            ui.sendMessage(uiMessages.expireMessage('Play', delaySeconds)) 
+            rospy.sleep(delaySeconds)
+            ui.sendMessage(uiMessages.expireMessage('Intermission', 0)) 
+            startButtonEnabled = True
+
+if __name__ == '__main__':
+
+    rospy.init_node('Control', log_level = rospy.DEBUG)
+    rospy.loginfo('%s starting' % (serverName))
+
+    ui = UIServer(serverName)
+    rospy.logdebug('UIServer connected')
+
+    uiMessages = ui.uiMessages
+
+    mainControlLoop(ui)
+
+    rospy.logwarn('Stopping')
+
+    sys.exit(0)

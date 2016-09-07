@@ -1,0 +1,30 @@
+#
+# Bill Mania <bill@manialabs.us>
+#
+# Service used with the Happ Fighting UGCI to set the button
+# lamp states to ON or OFF. The service works with the first 8
+# lamps, numbered 0 through 7 on the daughterboard. The
+# correspondence between lamps and their bit position is:
+#
+#  Lamp   Bit Value
+#    0        1
+#    1        2
+#    2        4
+#    3        8
+#    4       16
+#    5       32
+#    6       64
+#    7      128
+#
+# to light multiple lamps simultaneously, OR the Bit Values. For example
+# to light lamps 2 and 5 and extinguish all of the others:
+#
+#     lampStates = 2 | 5
+#
+int8 lampStates
+
+---
+#
+# True if the request succeeded, False otherwise
+#
+bool succeeded

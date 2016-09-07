@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+
+# Copyright 2011 Adler Planetarium
+# Created by Bill Mania and Mania Labs for Adler Planetarium
+# bill@manialabs.us
+
+import roslib ; roslib.load_manifest('DirectionButtons')
+
+import rospy
+from DirectionButtons.msg import *
+from InputEvents import InputEvents
+
+class DirectionButtons():
+    def __init__(self, name):
+
+        self.name = name
+        self.numberOfEvents = 0
+
+        rospy.logdebug('Initializing DirectionButtons')
+        self.initializeDirectionButtons()
+
+        self.directionButtons = DirectionButton()
+        rospy.logdebug('Registering as DirectionButton publisher')
+        rospy.init_node('DirectionButtons', log_level = rospy.DEBUG)
+        self.publisher = rospy.Publisher('directionButtons', DirectionButton)
+
+        rospy.loginfo('Initialization complete')
+
+        return
+
+    def initializeDirectionButtons(self):
+        while True:
+            try:
+                
+                self.inputDevice = open(
+                    rospy.get_param('DirectionButtons/serial/device'),
+                    'r'
+                    )
+                break
+
+            except:
+                rospy.logwarn('Unable to open inputDevice %s' % (
+                        rospy.get_param('DirectionButtons/serial/device'
+                        )))
+                rospy.sleep(15.0)
+                pass
+
+        preamble = self.inputDevice.read(64)
+
+        self.inputLookup = {
+            rospy.get_param('DirectionButtons/direction/forward') : InputEvents.FORWARD,
+            rospy.get_param('DirectionButtons/direction/forwardRelease') : InputEvents.FORWARD_RELEASE,
+            rospy.get_param('DirectionButtons/direction/backward') : InputEvents.BACKWARD,
+            rospy.get_param('DirectionButtons/direction/backwardRelease') : InputEvents.BACKWARD_RELEASE,
+            rospy.get_param('DirectionButtons/direction/left') : InputEvents.LEFT,
+            rospy.get_param('DirectionButtons/direction/leftRelease') : InputEvents.LEFT_RELEASE,
+            rospy.get_param('DirectionButtons/direction/right') : InputEvents.RIGHT,
+            rospy.get_param('DirectionButtons/direction/rightRelease') : InputEvents.RIGHT_RELEASE,
+
+            rospy.get_param('DirectionButtons/buttons/start') : InputEvents.START,
+            rospy.get_param('DirectionButtons/buttons/startRelease') : InputEvents.START_RELEASE,
+            rospy.get_param('DirectionButtons/buttons/top') : InputEvents.TOP,
+            rospy.get_param('DirectionButtons/buttons/topRelease') : InputEvents.TOP_RELEASE,
+            rospy.get_param('DirectionButtons/buttons/middle') : InputEvents.MIDDLE,
+            rospy.get_param('DirectionButtons/buttons/middleRelease') : InputEvents.MIDDLE_RELEASE,
+            rospy.get_param('DirectionButtons/buttons/bottom') : InputEvents.BOTTOM,
+            rospy.get_param('DirectionButtons/buttons/bottomRelease') : InputEvents.BOTTOM_RELEASE
+            }
+
+        return
+
+    def readNextEvent(self):
+        noise = self.inputDevice.read(4)
+        bytesToRead = 4
+    
+        nextEvent = self.inputDevice.read(4)
+        nextEventKey = '%d,%d,%d,%d' % (
+            ord(nextEvent[0]),
+            ord(nextEvent[1]),
+            ord(nextEvent[2]),
+            ord(nextEvent[3])
+            )
+
+        self.numberOfEvents = self.numberOfEvents + 1
+        if self.numberOfEvents > 100:
+            rospy.logdebug('Number of jbserver events: %d' % (self.numberOfEvents))
+            self.numberOfEvents = 0
+
+        rospy.logdebug('Read event: %s' % (nextEventKey))
+        if self.inputLookup.has_key(nextEventKey):
+            return self.inputLookup[nextEventKey]
+        else:
+            return InputEvents.UNKNOWN_EVENT
+
+    def sendEvent(self, event):
+        if self.client == None:
+            rospy.logwarn('Reconnecting client')
+            self.connectClient()
+
+        try:
+            self.client.send(event)
+            self.client.send(InputEvents.eventTerminator)
+
+        except:
+            rospy.logwarn('send() failed, disconnecting')
+            self.disconnectClient()
+
+        return
+
+    def processEvents(self):
+        while not rospy.is_shutdown():
+            nextEvent = self.readNextEvent()
+            rospy.logdebug('Read event %s' % (nextEvent))
+            self.directionButtons.buttonEvent = nextEvent
+            self.publisher.publish(self.directionButtons)
+
+        return
+
+if __name__ == '__main__':
+
+    dbInput = DirectionButtons('DBServer')
+    
+    dbInput.processEvents()
+
+    rospy.loginfo('Stopping')
+
+    sys.exit(0)

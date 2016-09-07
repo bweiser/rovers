@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/planetxrobots/!svn/ver/46/ros/RoverState/msg
+END
+Battery.msg
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/planetxrobots/!svn/ver/46/ros/RoverState/msg/Battery.msg
+END
+Range.msg
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/planetxrobots/!svn/ver/46/ros/RoverState/msg/Range.msg
+END

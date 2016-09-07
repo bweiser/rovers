@@ -1,0 +1,14 @@
+<package>
+  <description brief="DirectionButtons">
+
+     A node to publish the press of the direction buttons.
+
+  </description>
+  <author>Bill Mania, bill@manialabs.us</author>
+  <license>Copyright 2011 Adler Planetarium</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="rospy"/>
+
+</package>
+
+

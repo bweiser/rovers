@@ -1,0 +1,15 @@
+/opt/planetxrobots/ros/Control/CMakeFiles/ROSBUILD_genmsg_cpp.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/ROSBUILD_genmsg_lisp.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/ROSBUILD_gensrv_cpp.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/ROSBUILD_gensrv_lisp.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/clean-test-results.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/rosbuild_precompile.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/rosbuild_premsgsrvgen.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/rospack_genmsg.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/rospack_genmsg_libexe.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/rospack_gensrv.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/test.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/test-future.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/test-results.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/test-results-run.dir
+/opt/planetxrobots/ros/Control/CMakeFiles/tests.dir
